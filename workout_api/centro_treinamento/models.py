@@ -1,6 +1,10 @@
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from workout_api.contrib.models import BaseModel
+
+if TYPE_CHECKING:
+    from workout_api.atleta.models import AtletaModel
 
 
 class CentroTreinamentoModel(BaseModel):
@@ -10,4 +14,4 @@ class CentroTreinamentoModel(BaseModel):
     nome: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     endereco: Mapped[str] = mapped_column(String(60), nullable=False)
     proprietario: Mapped[str] = mapped_column(String(30), nullable=False)
-    atletas: Mapped['AtletaModel'] = relationship(back_populates='centro_treinamento')
+    atletas: Mapped[list['AtletaModel']] = relationship(back_populates='centro_treinamento')

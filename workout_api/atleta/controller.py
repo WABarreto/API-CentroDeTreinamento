@@ -7,7 +7,7 @@ from workout_api.atleta.models import AtletaModel
 from workout_api.atleta.schemas import AtletaIn, AtletaOut, AtletaUpdate
 from workout_api.categorias.models import CategoriaModel
 from workout_api.centro_treinamento.models import CentroTreinamentoModel
-from workout_api.contrib.dependencies import DataBaseDependecy
+from workout_api.contrib.dependencies import DataBaseDependency
 from sqlalchemy.future import select
 
 router = APIRouter()
@@ -19,7 +19,7 @@ router = APIRouter()
     response_model = AtletaOut
 )
 async def post(
-    db_session: DataBaseDependecy,
+    db_session: DataBaseDependency,
     atleta_in: AtletaIn = Body(...)
 ):
     categoria_nome = atleta_in.categoria.nome
@@ -31,7 +31,7 @@ async def post(
 
     if not categoria:
         raise HTTPException(
-            status_code=status.HTTP_404_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f'A categoria {categoria_nome} não foi encontrada'
         )
     
@@ -41,7 +41,7 @@ async def post(
 
     if not centro_treinamento:
         raise HTTPException(
-            status_code=status.HTTP_404_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f'O centro de treinamento {centro_treinamento_nome} não foi encontrado'
         )
     try:
@@ -68,7 +68,7 @@ async def post(
     status_code=status.HTTP_200_OK,
     response_model=list[AtletaOut],
 )
-async def query(db_session: DataBaseDependecy) -> AtletaOut:
+async def get_atletas(db_session: DataBaseDependency) -> AtletaOut:
     atletas: list[AtletaOut] = (await db_session.execute(select(AtletaModel))).scalars().all()
     
     return [AtletaOut.model_validate(atleta) for atleta in atletas]
@@ -79,7 +79,7 @@ async def query(db_session: DataBaseDependecy) -> AtletaOut:
     status_code=status.HTTP_200_OK,
     response_model=AtletaOut,
 )
-async def query(id: UUID4, db_session: DataBaseDependecy) -> AtletaOut:
+async def get_atleta_by_id(id: UUID4, db_session: DataBaseDependency) -> AtletaOut:
     atleta: AtletaOut = (
         await db_session.execute(select(AtletaModel).filter_by(id=id))
     ).scalars().first()
@@ -98,7 +98,7 @@ async def query(id: UUID4, db_session: DataBaseDependecy) -> AtletaOut:
     status_code=status.HTTP_200_OK,
     response_model=AtletaOut,
 )
-async def query(id: UUID4, db_session: DataBaseDependecy, atleta_up: AtletaUpdate = Body(...)) -> AtletaOut:
+async def patch_atleta_by_id(id: UUID4, db_session: DataBaseDependency, atleta_up: AtletaUpdate = Body(...)) -> AtletaOut:
     atleta: AtletaOut = (
         await db_session.execute(select(AtletaModel).filter_by(id=id))
     ).scalars().first()
@@ -122,7 +122,7 @@ async def query(id: UUID4, db_session: DataBaseDependecy, atleta_up: AtletaUpdat
     summary='Deletar um atleta pelo id',
     status_code=status.HTTP_204_NO_CONTENT
 )
-async def query(id: UUID4, db_session: DataBaseDependecy) -> None:
+async def delete_atleta_by_id(id: UUID4, db_session: DataBaseDependency) -> None:
     atleta: AtletaOut = (
         await db_session.execute(select(AtletaModel).filter_by(id=id))
     ).scalars().first()
